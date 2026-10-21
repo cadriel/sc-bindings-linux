@@ -1,0 +1,49 @@
+# joytokey profile: Dual VKB Gladiator NXT for Star Citizen Alpha 4.10
+# (port of 'JoyToKey Dual VKB 4.10.cfg'). Copy this file and edit it for other joysticks:
+#   joytokey.py --list-devices      shows connected joysticks and what to put under [devices]
+#   joytokey.py --monitor           prints axis names and button numbers as you move/press things
+
+[devices]
+# Roles are just names you refer to below. Each value is matched against:
+#   - a glob on /dev/input/by-id   (e.g. "*Gladiator_NXT_L-event-joystick")
+#   - "name:<text>"                 substring of the evdev device name
+#   - an absolute path              (e.g. "/dev/input/event21")
+# --mirrored swaps the first two roles' devices (left <-> right).
+left  = "*Gladiator_NXT_L-event-joystick"
+right = "*Gladiator_NXT_R-event-joystick"
+
+[mouse]                     # optional: an analog stick that moves the mouse pointer
+device    = "left"
+x_axis    = "ABS_RX"        # evdev axis names (see --monitor)
+y_axis    = "ABS_RY"
+invert_x  = false
+invert_y  = true
+deadzone  = 0.20            # fraction of full deflection ignored around centre
+speed     = 600             # pixels/second at full deflection
+hz        = 100             # update rate
+
+[wheel]
+hz = 10                     # wheel notches/second while a wheel button is held
+
+# Button numbers are 1-based, in the order the device reports its buttons
+# (same numbering as JoyToKey / --monitor). Each entry needs `keys` and/or `wheel`.
+# `keys` are evdev names pressed together (KEY_*, BTN_*); `wheel` is +1 (up) or -1 (down).
+[[button]]
+device = "right"
+number = 3
+keys   = ["KEY_R"]
+
+[[button]]
+device = "right"
+number = 5
+keys   = ["KEY_RIGHTCTRL", "KEY_F4"]
+
+[[button]]
+device = "right"
+number = 16
+wheel  = 1
+
+[[button]]
+device = "right"
+number = 18
+wheel  = -1

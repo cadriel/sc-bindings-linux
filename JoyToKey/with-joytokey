@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Run a command with the JoyToKey replacement active for exactly as long as it runs.
+# Usage: with-joytokey [--config FILE] [--mirrored] <command> [args...]
+# e.g.   with-joytokey game-performance "$wine_path"/wine "C:\...\RSI Launcher.exe"
+# If the daemon can't start (e.g. a stick is unplugged), the command still runs.
+
+dir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+daemon_args=()
+while [[ "${1:-}" == --mirrored || "${1:-}" == --config ]]; do
+    if [[ "$1" == --config ]]; then [[ $# -ge 2 ]] || { echo "--config needs a file" >&2; exit 2; }; daemon_args+=(--config "$2"); shift 2
+    else daemon_args+=(--mirrored); shift; fi
+done
+[[ $# -gt 0 ]] || { echo "usage: ${0##*/} [--config FILE] [--mirrored] <command> [args...]" >&2; exit 2; }
+
+log="${XDG_STATE_HOME:-$HOME/.local/state}/joytokey.log"
+mkdir -p "$(dirname "$log")"
+python3 "$dir/joytokey.py" "${daemon_args[@]}" >"$log" 2>&1 &
+daemon=$!
+trap 'kill "$daemon" 2>/dev/null; wait "$daemon" 2>/dev/null' EXIT
+
+"$@"
