@@ -2,7 +2,8 @@
 # Run a command with the JoyToKey replacement active for exactly as long as it runs.
 # Usage: with-joytokey [--config FILE.cfg] [--joysticks DEV,DEV] <command> [args...]
 # e.g.   with-joytokey --config "JoyToKey Dual VKB 4.10.cfg" game-performance "$wine_path"/wine "C:\...\RSI Launcher.exe"
-# If the daemon can't start (e.g. a stick is unplugged), the command still runs.
+# Waits (up to 15s) for the daemon to report "ready" before starting the command.
+# If the daemon can't start (e.g. a stick is unplugged), the command still runs, with a warning.
 
 dir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 daemon_args=()
@@ -17,5 +18,12 @@ mkdir -p "$(dirname "$log")"
 python3 "$dir/joytokey.py" "${daemon_args[@]}" >"$log" 2>&1 &
 daemon=$!
 trap 'kill "$daemon" 2>/dev/null; wait "$daemon" 2>/dev/null' EXIT
+
+for _ in $(seq 150); do
+    grep -qx ready "$log" 2>/dev/null && break
+    kill -0 "$daemon" 2>/dev/null || { echo "with-joytokey: daemon failed, running without it:" >&2; sed 's/^/  /' "$log" >&2; break; }
+    sleep 0.1
+done
+kill -0 "$daemon" 2>/dev/null && ! grep -qx ready "$log" && echo "with-joytokey: daemon not ready after 15s, continuing (see $log)" >&2
 
 "$@"

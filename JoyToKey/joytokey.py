@@ -16,6 +16,7 @@ USER_SETTINGS = os.path.join(os.environ.get("XDG_CONFIG_HOME", os.path.expanduse
 DEFAULT_SETTINGS = os.path.join(HERE, "profiles", "vkb-gladiator-nxt.toml")
 MOUSE_PX_PER_SEC_PER_PERCENT = 6    # a JoyToKey mouse speed of 100 moves 600 px/s
 MOUSE_HZ = 100
+READY_LINE = "ready"                 # printed once devices are open; with-joytokey waits for it
 WHEEL_HZ = 10                       # wheel notches/second while a wheel button is held
 
 
@@ -188,6 +189,7 @@ async def run(args):
     print(f"config: {cfgpath}", flush=True)
     for j in sorted(joys):
         print(f"Joystick {j}: {dev(j).name.strip()} ({dev(j).path})", flush=True)
+    print(READY_LINE, flush=True)
     await asyncio.gather(*tasks)
 
 

@@ -11,7 +11,7 @@ Supported in a `.cfg`: keyboard buttons, mouse-wheel buttons, and axes that move
 
 Needs `python-evdev` (`sudo pacman -S python-evdev`), Python 3.11+, and access to `/dev/input/event*` and `/dev/uinput`.
 
-    ./install.sh              # copies to ~/.local/share/joytokey, links ~/.local/bin/with-joytokey
+    ./install.sh              # copies to ~/.local/share/joytokey, links ~/.local/bin/joytokey and ~/.local/bin/with-joytokey
     ./install.sh --uninstall
 
 Run a game (or any command) with the daemon active only while it runs:
