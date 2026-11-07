@@ -63,10 +63,23 @@ def button_index_map(dev):
     return {c: i + 1 for i, c in enumerate(codes)}
 
 
+# Windows JoyToKey numbers axes X, Y, Z, R, U, V (winmm order), where R = Rz, U = Rx, V = Ry.
+# Plain evdev code order would make Axis5/6 = Ry/Rz instead of Rx/Ry (e.g. twist instead of ministick).
+JOYTOKEY_AXIS_ORDER = (e.ABS_X, e.ABS_Y, e.ABS_Z, e.ABS_RZ, e.ABS_RX, e.ABS_RY)
+
+
 def axis_index_map(dev):
-    """evdev axis code -> 1-based axis number (Nth axis in sorted code order)."""
-    codes = sorted(c for c, _ in dev.capabilities().get(e.EV_ABS, []))
-    return {c: i + 1 for i, c in enumerate(codes)}
+    """evdev axis code -> 1-based JoyToKey axis number."""
+    return axis_numbers_for(c for c, _ in dev.capabilities().get(e.EV_ABS, []))
+
+
+def axis_numbers_for(codes):
+    """Fixed slots like JoyToKey: X=1, Y=2, Z=3, Rz=4, Rx=5, Ry=6; other axes follow from 7 in code order."""
+    codes = set(codes)
+    numbers = {c: i + 1 for i, c in enumerate(JOYTOKEY_AXIS_ORDER) if c in codes}
+    extra = sorted(codes - set(JOYTOKEY_AXIS_ORDER))
+    numbers.update({c: len(JOYTOKEY_AXIS_ORDER) + i + 1 for i, c in enumerate(extra)})
+    return numbers
 
 
 def list_devices_cmd():
