@@ -28,6 +28,18 @@ A `.cfg` only says "Joystick 1", "Joystick 2", ... so tell joytokey which device
 
 `--joysticks DEV,DEV` overrides the settings file. Settings lookup: `$JOYTOKEY_CONFIG`, `~/.config/joytokey/config.toml`, then the bundled VKB settings.
 
+### Optional settings
+These go in the same settings file:
+
+| Setting | Default | Effect |
+| --- | --- | --- |
+| `cfg` | none | JoyToKey `.cfg` to run when `--config` isn't given. |
+| `mouse_speed` | `1.0` | Multiplier for axis-to-mouse movement. At `1.0`, a JoyToKey mouse speed of 100 moves 600 px/s at full deflection; `1.5` is 50% faster. Must be positive. |
+| `deadzone` | from `.cfg` | Axis deadzone in percent (0–99) for axis-to-mouse. Replaces the `.cfg`'s `Threshold`/`Threshold2` for every joystick. |
+
+    mouse_speed = 1.5
+    deadzone = 8
+
 The previous TOML-profile version is kept in `JoyToKey/legacy/` as a backup.
 
 ## Recommended In Game Curves
