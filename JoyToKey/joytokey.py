@@ -14,7 +14,7 @@ from joytokey_cfg import parse
 HERE = os.path.dirname(os.path.realpath(__file__))
 USER_SETTINGS = os.path.join(os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config")), "joytokey", "config.toml")
 DEFAULT_SETTINGS = os.path.join(HERE, "profiles", "vkb-gladiator-nxt.toml")
-MOUSE_PX_PER_SEC_PER_PERCENT = 6    # a JoyToKey mouse speed of 100 moves 600 px/s
+MOUSE_PX_PER_SEC_PER_PERCENT = 6    # a JoyToKey mouse speed of 100 moves 600 px/s (times `mouse_speed` from settings)
 MOUSE_HZ = 100
 READY_LINE = "ready"                 # printed once devices are open; with-joytokey waits for it
 WHEEL_HZ = 10                       # wheel notches/second while a wheel button is held
@@ -113,6 +113,11 @@ async def run(args):
     specs = args.joysticks.split(",") if args.joysticks else settings.get("joysticks") or die("settings define no 'joysticks'")
     for w in cfg.warnings:
         print(f"warning: {w}", file=sys.stderr)
+    if "deadzone" in settings:   # percent; overrides the cfg's Threshold/Threshold2 for every joystick
+        dz = float(settings["deadzone"])
+        if not 0 <= dz < 100:
+            die(f"deadzone must be 0-99 percent (got {dz})")
+        cfg.deadzones = {j: dz / 100 for j in cfg.deadzones}
 
     devs = {}
     def dev(joy):
@@ -129,6 +134,9 @@ async def run(args):
     if rel:
         caps[e.EV_REL] = rel
     ui = UInput(caps, name="joytokey")
+    mouse_speed = float(settings.get("mouse_speed", 1.0))
+    if mouse_speed <= 0:
+        die(f"mouse_speed must be positive (got {mouse_speed})")
 
     joys = {j for j, _ in cfg.buttons} | {j for j, _ in cfg.axes}
     if args.monitor:   # watch every configured device so button/axis numbers can be discovered
@@ -179,8 +187,8 @@ async def run(args):
                 vx, vy = cfg.axes[key].get("p" if v > 0 else "n", (0, 0))
                 dx += vx * abs(v)
                 dy += vy * abs(v)
-            rx += dx * MOUSE_PX_PER_SEC_PER_PERCENT / MOUSE_HZ
-            ry += dy * MOUSE_PX_PER_SEC_PER_PERCENT / MOUSE_HZ
+            rx += dx * mouse_speed * MOUSE_PX_PER_SEC_PER_PERCENT / MOUSE_HZ
+            ry += dy * mouse_speed * MOUSE_PX_PER_SEC_PER_PERCENT / MOUSE_HZ
             ix, iy = int(rx), int(ry)
             rx -= ix; ry -= iy
             if ix: ui.write(e.EV_REL, e.REL_X, ix)

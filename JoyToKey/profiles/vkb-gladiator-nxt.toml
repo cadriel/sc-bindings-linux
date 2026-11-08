@@ -14,3 +14,9 @@ joysticks = [
 
 # Optional: JoyToKey .cfg to run when --config is not given.
 # cfg = "/path/to/JoyToKey Dual VKB 4.10.cfg"
+
+# Optional: multiplier for mouse movement from axes (1.0 = JoyToKey speed 100 moves 600 px/s at full deflection).
+# mouse_speed = 1.5
+
+# Optional: axis deadzone in percent for axis-to-mouse, overriding the cfg's Threshold/Threshold2.
+# deadzone = 8
